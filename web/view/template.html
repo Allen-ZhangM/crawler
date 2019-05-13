@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>template</title>
+</head>
+<body>
+
+<div>
+    <form method="get">
+        <input type="text" value="{{.Query}}" name="q">
+        <button type="submit">搜索</button>
+    </form>
+
+</div>
+
+共{{.Hits}}条记录,从第{{.Start}}条开始
+
+<table>
+{{range .Items}}
+    <tr>
+        <td><a href="{{.Url}}">{{.Payload.Name}}</a></td>
+    {{with .Payload}}
+        <td>{{.Gender}}</td>
+        <td>{{.Age}}</td>
+        <td>{{.Height}}</td>
+        <td>{{.Weight}}</td>
+        <td>{{.Income}}</td>
+        <td>{{.Education}}</td>
+    {{end}}
+    </tr>
+{{else}}
+    <div>没有找到相关用户</div>
+{{end}}
+</table>
+<div>
+    {{if ge .PrevFrom 0}}
+    <a href="search?q={{.Query}}&from={{.PrevFrom}}">上一页</a>
+    {{end}}
+    <a href="search?q={{.Query}}&from={{.NextFrom}}">下一页</a>
+</div>
+</body>
+</html>

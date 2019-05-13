@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crawler/engine"
 	"crawler/fetcher"
+	"crawler/persist"
 	"crawler/scheduler"
 	"crawler/zhenaiwang/parser"
 	"fmt"
@@ -21,6 +22,7 @@ func runConcurrent() {
 	e := engine.ConcurrentEngine{
 		Scheduler:   &shceduler.QueuedScheduler{},
 		WorkerCount: 100,
+		ItemChan:    persist.ItemSaver(),
 	}
 	e.RunConcurrentRequest(engine.Request{
 		Url:        "http://www.zhenai.com/zhenghun",

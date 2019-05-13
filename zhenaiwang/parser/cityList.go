@@ -17,7 +17,6 @@ func ParseCityList(bytes []byte) engine.ParserResult {
 		if i > 500 {
 			break
 		}
-		result.Item = append(result.Item, string(m[2]))
 		result.Requests = append(result.Requests, engine.Request{
 			Url:        string(m[1]),
 			ParserFunc: ParseCity,
