@@ -26,7 +26,7 @@ func TestItemSaver(t *testing.T) {
 		panic(err)
 	}
 
-	err = save(client, item)
+	err = Save(client, "dating_profile", item)
 	if err != nil {
 		panic(err)
 	}
