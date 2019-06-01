@@ -2,7 +2,7 @@ package main
 
 import (
 	"crawler/distributed/persist"
-	"crawler/rpc"
+	rpc "crawler/distributed/rpcSupport"
 	"gopkg.in/olivere/elastic.v5"
 	"log"
 )
