@@ -1,19 +1,21 @@
 package rpcSupport
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 )
 
-func ServerRPC(host string, service interface{}) {
+func ServerRPC(host string, service interface{}) error {
 	rpc.Register(service)
 
 	l, e := net.Listen("tcp", host)
 	if e != nil {
-		panic(e)
+		return e
 	}
+	fmt.Printf("Listening on %s", host)
 
 	for {
 		c, e := l.Accept()

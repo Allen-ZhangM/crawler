@@ -20,7 +20,7 @@ func runConcurrent() {
 		ItemChan:    client,
 	}
 	e.RunConcurrentRequest(engine.Request{
-		Url:        "http://www.zhenai.com/zhenghun/yingkou",
-		ParserFunc: parser.ParseCityList,
+		Url:    "http://www.zhenai.com/zhenghun/yingkou",
+		Parser: engine.NewFuncParser(parser.ParseCityList, "ParseCityList"),
 	})
 }

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"crawler/distributed/config"
 	"crawler/engine"
 	"crawler/model"
 	"regexp"
@@ -16,7 +17,6 @@ var regexGender = regexp.MustCompile(`"genderString":"([^"]+)"`)
 func ParseProfile(bytes []byte, photoUrl string, name string, url string) engine.ParserResult {
 	allProfile := regexProfile.FindAllSubmatch(bytes, -1)
 	allGender := regexGender.FindAllSubmatch(bytes, -1)
-
 	urlSplits := strings.Split(url, "/")
 
 	var result engine.ParserResult
@@ -35,4 +35,27 @@ func ParseProfile(bytes []byte, photoUrl string, name string, url string) engine
 	}
 
 	return result
+}
+
+type ProfileParser struct {
+	UserName string
+	PhotoUrl string
+}
+
+func (p *ProfileParser) Parse(contents []byte, url string) engine.ParserResult {
+	return ParseProfile(contents, p.PhotoUrl, p.UserName, url)
+}
+
+func (p *ProfileParser) Serialize() (name string, args interface{}) {
+	return config.ParseProfile, ProfileParser{
+		UserName: p.UserName,
+		PhotoUrl: p.PhotoUrl,
+	}
+}
+
+func NewProfileParser(name string, photoUrl string) *ProfileParser {
+	return &ProfileParser{
+		UserName: name,
+		PhotoUrl: photoUrl,
+	}
 }

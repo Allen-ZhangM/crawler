@@ -21,7 +21,7 @@ func RunFetch(seeds ...Request) {
 			log.Printf("Fetcher: error fetching url %s: %v", request.Url, err)
 			continue
 		}
-		parseResult := request.ParserFunc(body)
+		parseResult := request.Parser.Parse(body, request.Url)
 		queue = append(queue, parseResult.Requests...)
 
 		for _, item := range parseResult.Item {
@@ -51,7 +51,7 @@ func RunRequest(seeds ...Request) {
 			continue
 		}
 
-		parseResult := request.ParserFunc(body)
+		parseResult := request.Parser.Parse(body, request.Url)
 		queue = append(queue, parseResult.Requests...)
 
 		for _, item := range parseResult.Item {

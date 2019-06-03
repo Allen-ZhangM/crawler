@@ -2,6 +2,7 @@ package persist
 
 import (
 	"context"
+	"crawler/distributed/config"
 	"crawler/engine"
 	"errors"
 	"gopkg.in/olivere/elastic.v5"
@@ -23,7 +24,7 @@ func ItemSaver() chan engine.Item {
 			item := <-out
 			log.Printf("Item saver: got item #%d: %v", itemCount, item)
 			itemCount++
-			err := Save(client, "dating_profile", item)
+			err := Save(client, config.ElasticIndex, item)
 			if err != nil {
 				log.Printf("Item saver error : item #%d: %v", itemCount, item)
 			}

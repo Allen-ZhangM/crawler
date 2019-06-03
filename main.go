@@ -2,15 +2,21 @@ package main
 
 import (
 	"bytes"
+	"crawler/distributed/config"
+	itemsaver "crawler/distributed/persist/client"
+	"crawler/distributed/rpcSupport"
+	worker "crawler/distributed/worker/client"
 	"crawler/engine"
 	"crawler/fetcher"
-	"crawler/persist"
 	"crawler/scheduler"
 	"crawler/zhenaiwang/parser"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/rpc"
+	"strings"
 )
 
 func main() {
@@ -18,22 +24,56 @@ func main() {
 	//runRequest()
 }
 
+var (
+	itemSaverHost = flag.String("itemsaver_host", "", "itemsaver host")
+	workerHosts   = flag.String("worker_hosts", "", "worker_hosts host (comma separated)")
+)
+
 func runConcurrent() {
+	flag.Parse()
+
+	itemChan := itemsaver.ItemSaver(*itemSaverHost)
+
+	processor := worker.CreateProcessor(createClientPool(strings.Split(*workerHosts, ",")))
+
 	e := engine.ConcurrentEngine{
-		Scheduler:   &shceduler.QueuedScheduler{},
-		WorkerCount: 100,
-		ItemChan:    persist.ItemSaver(),
+		Scheduler:        &shceduler.QueuedScheduler{},
+		WorkerCount:      100,
+		ItemChan:         itemChan,
+		RequestProcessor: processor,
 	}
 	e.RunConcurrentRequest(engine.Request{
-		Url:        "http://www.zhenai.com/zhenghun",
-		ParserFunc: parser.ParseCityList,
+		Url:    "http://www.zhenai.com/zhenghun",
+		Parser: engine.NewFuncParser(parser.ParseCityList, config.ParseCityList),
 	})
+}
+
+func createClientPool(hosts []string) chan *rpc.Client {
+	var clients []*rpc.Client
+	for _, host := range hosts {
+		c, e := rpcSupport.NewClient(host)
+		if e != nil {
+			log.Println(e)
+		} else {
+			clients = append(clients, c)
+		}
+	}
+
+	out := make(chan *rpc.Client)
+	go func() {
+		for {
+			for _, c := range clients {
+				out <- c
+			}
+		}
+	}()
+	return out
 }
 
 func runSimple() {
 	engine.RunRequest(engine.Request{
-		Url:        "http://www.zhenai.com/zhenghun",
-		ParserFunc: parser.ParseCityList,
+		Url:    "http://www.zhenai.com/zhenghun",
+		Parser: engine.NewFuncParser(parser.ParseCityList, "ParseCityList"),
 	})
 }
 

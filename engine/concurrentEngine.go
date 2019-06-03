@@ -6,10 +6,13 @@ import (
 )
 
 type ConcurrentEngine struct {
-	Scheduler   Scheduler
-	WorkerCount int
-	ItemChan    chan Item
+	Scheduler        Scheduler
+	WorkerCount      int
+	ItemChan         chan Item
+	RequestProcessor Process
 }
+
+type Process func(Request) ParserResult
 
 type Scheduler interface {
 	Submit(Request)
@@ -26,7 +29,7 @@ func (e *ConcurrentEngine) RunConcurrentRequest(seeds ...Request) {
 	out := make(chan ParserResult)
 	e.Scheduler.Run()
 	for i := 0; i < e.WorkerCount; i++ {
-		createWorker(e.Scheduler.WorkerChan(), out, e.Scheduler)
+		e.createWorker(e.Scheduler.WorkerChan(), out, e.Scheduler)
 	}
 
 	for _, seed := range seeds {
@@ -47,18 +50,18 @@ func (e *ConcurrentEngine) RunConcurrentRequest(seeds ...Request) {
 
 }
 
-func createWorker(in chan Request, out chan ParserResult, r ReadyNotifier) {
+func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParserResult, r ReadyNotifier) {
 	go func() {
 		for {
 			r.WorkerReady(in)
 			result := <-in
-			parserResult := worker(result)
+			parserResult := e.RequestProcessor(result)
 			out <- parserResult
 		}
 	}()
 }
 
-func worker(request Request) ParserResult {
+func Worker(request Request) ParserResult {
 	log.Printf("Request url: %s", request.Url)
 
 	body, err := fetcher.Request(request.Url)
@@ -68,5 +71,5 @@ func worker(request Request) ParserResult {
 		return ParserResult{}
 	}
 
-	return request.ParserFunc(body)
+	return request.Parser.Parse(body, request.Url)
 }

@@ -7,7 +7,7 @@ import (
 
 var regexCity = regexp.MustCompile(`<a href="(http://www.zhenai.com/zhenghun/[0-9a-z]+)"[^>]*>([^<]+)</a>`)
 
-func ParseCityList(bytes []byte) engine.ParserResult {
+func ParseCityList(bytes []byte, url string) engine.ParserResult {
 	all := regexCity.FindAllSubmatch(bytes, -1)
 
 	result := engine.ParserResult{}
@@ -18,8 +18,8 @@ func ParseCityList(bytes []byte) engine.ParserResult {
 			break
 		}
 		result.Requests = append(result.Requests, engine.Request{
-			Url:        string(m[1]),
-			ParserFunc: ParseCity,
+			Url:    string(m[1]),
+			Parser: engine.NewFuncParser(ParseCity, "ParseCity"),
 		})
 	}
 	return result

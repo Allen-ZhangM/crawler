@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"crawler/distributed/config"
 	"crawler/engine"
 	"crawler/web/model"
 	"crawler/web/view"
@@ -43,9 +44,9 @@ func (s *SearchHandler) getSearchResult(q string, from int) (model.SearchResult,
 	var resp *elastic.SearchResult
 	var err error
 	if q == "" {
-		resp, err = s.client.Search("dating_profile").From(from).Do(context.Background())
+		resp, err = s.client.Search(config.ElasticIndex).From(from).Do(context.Background())
 	} else {
-		resp, err = s.client.Search("dating_profile").Query(elastic.NewQueryStringQuery(q)).From(from).Do(context.Background())
+		resp, err = s.client.Search(config.ElasticIndex).Query(elastic.NewQueryStringQuery(q)).From(from).Do(context.Background())
 	}
 	if err != nil {
 		return result, err

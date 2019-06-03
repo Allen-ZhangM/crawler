@@ -2,6 +2,7 @@ package persist
 
 import (
 	"context"
+	"crawler/distributed/config"
 	"crawler/engine"
 	"crawler/model"
 	"gopkg.in/olivere/elastic.v5"
@@ -26,13 +27,13 @@ func TestItemSaver(t *testing.T) {
 		panic(err)
 	}
 
-	err = Save(client, "dating_profile", item)
+	err = Save(client, config.ElasticIndex, item)
 	if err != nil {
 		panic(err)
 	}
 
 	resp, err := client.Get().
-		Index("dating_profile").
+		Index(config.ElasticIndex).
 		Type(item.Type).Id(item.Id).
 		Do(context.Background())
 	if err != nil {

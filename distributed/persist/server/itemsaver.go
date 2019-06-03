@@ -1,14 +1,24 @@
 package main
 
 import (
+	"crawler/distributed/config"
 	"crawler/distributed/persist"
 	rpc "crawler/distributed/rpcSupport"
+	"flag"
+	"fmt"
 	"gopkg.in/olivere/elastic.v5"
 	"log"
 )
 
+var port = flag.Int("port", 0, "the port for me to listen on")
+
 func main() {
-	log.Fatal(serverRPC(":1234", "dating_profile2"))
+	flag.Parse()
+	if *port == 0 {
+		fmt.Println("must specify a port")
+		return
+	}
+	log.Fatal(serverRPC(fmt.Sprintf(":%d", *port), config.ElasticIndex))
 }
 
 func serverRPC(host, index string) error {

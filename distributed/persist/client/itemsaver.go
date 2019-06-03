@@ -1,15 +1,16 @@
 package client
 
 import (
+	"crawler/distributed/config"
+	rpc "crawler/distributed/rpcSupport"
 	"crawler/engine"
-	"crawler/rpc"
 	"log"
 )
 
 func ItemSaver(host string) chan engine.Item {
 	client, e := rpc.NewClient(host)
 	if e != nil {
-		log.Println("elastic.NewClient error ")
+		log.Printf("rpc.NewClient(%v) error:%v ", host, e)
 	}
 	result := ""
 	out := make(chan engine.Item)
@@ -19,7 +20,7 @@ func ItemSaver(host string) chan engine.Item {
 			item := <-out
 			log.Printf("Item saver: got item #%d: %v", itemCount, item)
 			itemCount++
-			err := client.Call("ItemSaverService.Save", item, &result)
+			err := client.Call(config.ItemSaverRpc, item, &result)
 			if err != nil || result != "ok" {
 				log.Printf("call ItemSaverService.Save error : result:%s, err:%v", result, err)
 			}
